@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment Stat Planner - Clean Version</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #121216; color: #e2e2e7; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; }
+        
+        /* Header Selector */
+        .set-selector { background: #1e1e24; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; display: flex; align-items: center; gap: 15px; }
+        .set-selector label { font-weight: bold; color: #4a90e2; }
+        .main-set-dropdown { background: #2d2d35; color: white; border: 1px solid #444; padding: 10px 20px; border-radius: 5px; font-size: 16px; cursor: pointer; outline: none; }
+        
+        /* Table Structure */
+        .section-card { background: #1e1e24; border-radius: 8px; padding: 20px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h2 { font-size: 18px; margin-bottom: 15px; border-left: 4px solid #4a90e2; padding-left: 10px; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; text-align: center; }
+        th { background: #25252d; color: #888; font-size: 11px; padding: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 12px 10px; border-bottom: 1px solid #2d2d35; font-size: 13px; }
+        
+        /* Select Dropdowns */
+        .stat-select { background: transparent; color: white; border: 1px solid transparent; padding: 8px; border-radius: 4px; width: 100%; cursor: pointer; font-weight: bold; text-align: center; outline: none; font-size: 13px; }
+        .stat-select:hover { background: #2d2d35; border-color: #555; }
+        .stat-select option { background-color: #1e1e24; color: white; }
+        .stat-select option:disabled { color: #555; background-color: #15151a; }
+
+        /* Colors */
+        .text-purple { color: #b388ff !important; font-weight: bold; }
+        .text-yellow { color: #ffcc00 !important; font-weight: bold; }
+        
+        .excluded-info { font-size: 10px; color: #ff4d4d; display: block; margin-top: 4px; font-weight: normal; }
+        .piece-col { text-align: left; padding-left: 20px; font-weight: 500; min-width: 140px; }
+        .piece-col i { margin-right: 10px; color: #4a90e2; width: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="set-selector">
+        <label><i class="fas fa-filter"></i> BASE TYPE:</label>
+        <select id="set-type-selector" class="main-set-dropdown" onchange="renderPlanner()">
+            <option value="Intelligence">Intelligence (INT)</option>
+            <option value="Strength">Strength (STR)</option>
+            <option value="Agility">Agility (AGI)</option>
+        </select>
+    </div>
+
+    <section class="section-card">
+        <h2>Equipment Planner</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th class="piece-col">Piece</th>
+                    <th style="width: 20%;">Main Stat</th>
+                    <th style="width: 20%;">Substat</th>
+                    <th style="width: 20%;">Reforge</th>
+                    <th style="width: 25%;">Purple Lines</th>
+                </tr>
+            </thead>
+            <tbody id="planner-body">
+                <!-- เจนด้วย JS -->
+            </tbody>
+        </table>
+    </section>
+</div>
+
+<script>
+    const exclusionRules = {
+        "Intelligence": { "Head": "Crit Rate", "Chestpiece": "Crit Rate", "Gloves": "Versatility", "Boots": "Luck", "Earrings": "Versatility", "Necklace": "Luck", "Ring": "Mastery", "Bracelet L": "Haste", "Bracelet R": "Mastery", "Charm": "Haste" },
+        "Strength": { "Head": "Versatility", "Chestpiece": "Luck", "Gloves": "Haste", "Boots": "Mastery", "Earrings": "Mastery", "Necklace": "Haste", "Ring": "Luck", "Bracelet L": "Crit Rate", "Bracelet R": "Crit Rate", "Charm": "Versatility" },
+        "Agility": { "Head": "Haste", "Chestpiece": "Mastery", "Gloves": "Crit Rate", "Boots": "Crit Rate", "Earrings": "Haste", "Necklace": "Mastery", "Ring": "Versatility", "Bracelet L": "Versatility", "Bracelet R": "Luck", "Charm": "Luck" }
+    };
+
+    const gearPieces = [
+        { name: "Weapon", icon: "fa-sword", type: "weapon" },
+        { name: "Head", icon: "fa-helmet-battle", type: "armor" },
+        { name: "Chestpiece", icon: "fa-shield-halved", type: "armor" },
+        { name: "Gloves", icon: "fa-mitten", type: "armor" },
+        { name: "Boots", icon: "fa-boot", type: "armor" },
+        { name: "Earrings", icon: "fa-gem", type: "accessory" },
+        { name: "Necklace", icon: "fa-shield-heart", type: "accessory" },
+        { name: "Ring", icon: "fa-ring", type: "accessory" },
+        { name: "Bracelet L", icon: "fa-hand-dots", type: "accessory" },
+        { name: "Bracelet R", icon: "fa-hand-dots", type: "accessory" },
+        { name: "Charm", icon: "fa-scroll", type: "accessory" }
+    ];
+
+    const statsList = ["Crit Rate", "Haste", "Mastery", "Luck", "Versatility"];
+
+    const purpleOptions = {
+        armor: ["Strength %", "Agility %", "Intelligence %", "All Element Resistance", "Max HP"],
+        accessory: ["Melee DMG%", "Ranged DMG%", "DMG% Vs Bosses", "Attack Speed %", "Cast Speed %", "ATK", "MATK%", "Healing Intensity %", "Shield Strength %", "Resilience Break Efficiency %"],
+        weapon: ["Melee DMG%", "Ranged DMG%", "DMG% Vs Bosses", "Attack Speed %", "Cast Speed %", "ATK", "MATK%", "Healing Intensity %", "Shield Strength %", "Resilience Break Efficiency %"]
+    };
+
+    // ฟังก์ชันป้องกันการเลือกซ้ำ
+    function syncStats(selectElement) {
+        const row = selectElement.closest('tr');
+        const mainSelect = row.querySelector('.main-stat-select');
+        const subSelect = row.querySelector('.sub-stat-select');
+        
+        const mainVal = mainSelect.value;
+        const subVal = subSelect.value;
+
+        // Reset disabled states for both
+        Array.from(mainSelect.options).forEach(opt => opt.disabled = false);
+        Array.from(subSelect.options).forEach(opt => opt.disabled = false);
+
+        // Disable selected values in the opposite dropdown
+        if (mainVal) {
+            const optionToDisable = Array.from(subSelect.options).find(opt => opt.value === mainVal);
+            if (optionToDisable) optionToDisable.disabled = true;
+        }
+        if (subVal) {
+            const optionToDisable = Array.from(mainSelect.options).find(opt => opt.value === subVal);
+            if (optionToDisable) optionToDisable.disabled = true;
+        }
+    }
+
+    function renderPlanner() {
+        const selectedType = document.getElementById('set-type-selector').value;
+        const tbody = document.getElementById('planner-body');
+        const rules = exclusionRules[selectedType];
+
+        tbody.innerHTML = "";
+
+        gearPieces.forEach(piece => {
+            const excluded = rules[piece.name] || null;
+            const availableStats = statsList.filter(s => s !== excluded);
+            const pLineChoices = purpleOptions[piece.type] || [];
+
+            const createOptions = (list) => {
+                return `<option value="">-- Select --</option>` + 
+                       list.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+            };
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="piece-col"><i class="fas ${piece.icon}"></i> ${piece.name}</td>
+                
+                <!-- Main Stat -->
+                <td>
+                    <select class="stat-select main-stat-select" onchange="syncStats(this)">
+                        ${createOptions(availableStats)}
+                    </select>
+                    ${excluded ? `<span class="excluded-info">Excl: ${excluded}</span>` : ''}
+                </td>
+
+                <!-- Substat -->
+                <td>
+                    <select class="stat-select sub-stat-select" onchange="syncStats(this)">
+                        ${createOptions(availableStats)}
+                    </select>
+                </td>
+
+                <!-- Reforge (Yellow) -->
+                <td>
+                    <select class="stat-select text-yellow">
+                        ${createOptions(statsList)}
+                    </select>
+                </td>
+
+                <!-- Purple Lines (Purple) -->
+                <td>
+                    <select class="stat-select text-purple">
+                        ${createOptions(pLineChoices)}
+                    </select>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    window.onload = renderPlanner;
+</script>
+
+</body>
+</html>
