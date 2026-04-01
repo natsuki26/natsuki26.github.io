@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Equipment Stat Planner - Clean Version</title>
+    <title>Equipment Stat Planner</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background-color: #121216; color: #e2e2e7; font-family: 'Segoe UI', sans-serif; padding: 20px; }
@@ -31,7 +31,6 @@
         .text-purple { color: #b388ff !important; font-weight: bold; }
         .text-yellow { color: #ffcc00 !important; font-weight: bold; }
         
-        .excluded-info { font-size: 10px; color: #ff4d4d; display: block; margin-top: 4px; font-weight: normal; }
         .piece-col { text-align: left; padding-left: 20px; font-weight: 500; min-width: 140px; }
         .piece-col i { margin-right: 10px; color: #4a90e2; width: 16px; }
     </style>
@@ -42,7 +41,7 @@
     <div class="set-selector">
         <label><i class="fas fa-filter"></i> BASE TYPE:</label>
         <select id="set-type-selector" class="main-set-dropdown" onchange="renderPlanner()">
-            <option value="Intelligence">Intelligence (INT)</option>
+            <option value="Intellect">Intellect (INT)</option>
             <option value="Strength">Strength (STR)</option>
             <option value="Agility">Agility (AGI)</option>
         </select>
@@ -69,31 +68,31 @@
 
 <script>
     const exclusionRules = {
-        "Intelligence": { "Head": "Crit Rate", "Chestpiece": "Crit Rate", "Gloves": "Versatility", "Boots": "Luck", "Earrings": "Versatility", "Necklace": "Luck", "Ring": "Mastery", "Bracelet L": "Haste", "Bracelet R": "Mastery", "Charm": "Haste" },
-        "Strength": { "Head": "Versatility", "Chestpiece": "Luck", "Gloves": "Haste", "Boots": "Mastery", "Earrings": "Mastery", "Necklace": "Haste", "Ring": "Luck", "Bracelet L": "Crit Rate", "Bracelet R": "Crit Rate", "Charm": "Versatility" },
-        "Agility": { "Head": "Haste", "Chestpiece": "Mastery", "Gloves": "Crit Rate", "Boots": "Crit Rate", "Earrings": "Haste", "Necklace": "Mastery", "Ring": "Versatility", "Bracelet L": "Versatility", "Bracelet R": "Luck", "Charm": "Luck" }
+        "Intellect": { "Head": "Crit Rate", "Armor": "Crit Rate", "Gauntlets": "Versatility", "Boots": "Luck", "Earrings": "Versatility", "Necklace": "Luck", "Ring": "Mastery", "Bracelet L": "Haste", "Bracelet R": "Mastery", "Charm": "Haste" },
+        "Strength": { "Head": "Versatility", "Armor": "Luck", "Gauntlets": "Haste", "Boots": "Mastery", "Earrings": "Mastery", "Necklace": "Haste", "Ring": "Luck", "Bracelet L": "Crit Rate", "Bracelet R": "Crit Rate", "Charm": "Versatility" },
+        "Agility": { "Head": "Haste", "Armor": "Mastery", "Gauntlets": "Crit Rate", "Boots": "Crit Rate", "Earrings": "Haste", "Necklace": "Mastery", "Ring": "Versatility", "Bracelet L": "Versatility", "Bracelet R": "Luck", "Charm": "Luck" }
     };
 
     const gearPieces = [
         { name: "Weapon", icon: "fa-sword", type: "weapon" },
         { name: "Head", icon: "fa-helmet-battle", type: "armor" },
-        { name: "Chestpiece", icon: "fa-shield-halved", type: "armor" },
-        { name: "Gloves", icon: "fa-mitten", type: "armor" },
+        { name: "Armor", icon: "fa-shield-halved", type: "armor" },
+        { name: "Gauntlets", icon: "fa-mitten", type: "armor" },
         { name: "Boots", icon: "fa-boot", type: "armor" },
         { name: "Earrings", icon: "fa-gem", type: "accessory" },
         { name: "Necklace", icon: "fa-shield-heart", type: "accessory" },
         { name: "Ring", icon: "fa-ring", type: "accessory" },
-        { name: "Bracelet L", icon: "fa-hand-dots", type: "accessory" },
-        { name: "Bracelet R", icon: "fa-hand-dots", type: "accessory" },
+        { name: "Bracelet L", icon: "fa-hand-dots", type: "armor" },
+        { name: "Bracelet R", icon: "fa-hand-dots", type: "armor" },
         { name: "Charm", icon: "fa-scroll", type: "accessory" }
     ];
 
     const statsList = ["Crit Rate", "Haste", "Mastery", "Luck", "Versatility"];
 
     const purpleOptions = {
-        armor: ["Strength %", "Agility %", "Intelligence %", "All Element Resistance", "Max HP"],
-        accessory: ["Melee DMG%", "Ranged DMG%", "DMG% Vs Bosses", "Attack Speed %", "Cast Speed %", "ATK", "MATK%", "Healing Intensity %", "Shield Strength %", "Resilience Break Efficiency %"],
-        weapon: ["Melee DMG%", "Ranged DMG%", "DMG% Vs Bosses", "Attack Speed %", "Cast Speed %", "ATK", "MATK%", "Healing Intensity %", "Shield Strength %", "Resilience Break Efficiency %"]
+        armor: ["Strength %", "Agility %", "Intellect %", "All Resistance", "Armor", "Max HP"],
+        accessory: ["ATK", "MATK%", "Attack Speed %", "DMG% Vs Bosses", "Shield %", "Cast Speed %", "Healing Output %", "Resilience Break Efficiency %"],
+        weapon: ["ATK", "MATK%", "Attack Speed %", "DMG% Vs Bosses", "Shield %", "Cast Speed %", "Healing Output %", "Resilience Break Efficiency %"]
     };
 
     // ฟังก์ชันป้องกันการเลือกซ้ำ
@@ -146,7 +145,6 @@
                     <select class="stat-select main-stat-select" onchange="syncStats(this)">
                         ${createOptions(availableStats)}
                     </select>
-                    ${excluded ? `<span class="excluded-info">Excl: ${excluded}</span>` : ''}
                 </td>
 
                 <!-- Substat -->
