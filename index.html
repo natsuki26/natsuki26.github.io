@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background-color: #121216; color: #e2e2e7; font-family: 'Segoe UI', sans-serif; padding: 20px; }
-        .container { max-width: 1200px; margin: auto; }
+        .container { max-width: 1400px; margin: auto; }
         
         /* Header Selector */
         .set-selector { background: #1e1e24; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; display: flex; align-items: center; gap: 15px; }
@@ -15,14 +15,14 @@
         .main-set-dropdown { background: #2d2d35; color: white; border: 1px solid #444; padding: 10px 20px; border-radius: 5px; font-size: 16px; cursor: pointer; outline: none; }
         
         /* Table Structure */
-        .section-card { background: #1e1e24; border-radius: 8px; padding: 20px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .section-card { background: #1e1e24; border-radius: 8px; padding: 20px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow-x: auto; }
         h2 { font-size: 18px; margin-bottom: 15px; border-left: 4px solid #4a90e2; padding-left: 10px; text-transform: uppercase; }
-        table { width: 100%; border-collapse: collapse; text-align: center; }
+        table { width: 100%; border-collapse: collapse; text-align: center; min-width: 1100px; }
         th { background: #25252d; color: #888; font-size: 11px; padding: 15px; text-transform: uppercase; letter-spacing: 1px; }
-        td { padding: 12px 10px; border-bottom: 1px solid #2d2d35; font-size: 13px; }
+        td { padding: 10px 5px; border-bottom: 1px solid #2d2d35; font-size: 13px; }
         
         /* Select Dropdowns */
-        .stat-select { background: transparent; color: white; border: 1px solid transparent; padding: 8px; border-radius: 4px; width: 100%; cursor: pointer; font-weight: bold; text-align: center; outline: none; font-size: 13px; }
+        .stat-select { background: transparent; color: white; border: 1px solid transparent; padding: 8px 4px; border-radius: 4px; width: 100%; cursor: pointer; font-weight: bold; text-align: center; outline: none; font-size: 12px; }
         .stat-select:hover { background: #2d2d35; border-color: #555; }
         .stat-select option { background-color: #1e1e24; color: white; }
         .stat-select option:disabled { color: #555; background-color: #15151a; }
@@ -30,9 +30,12 @@
         /* Colors */
         .text-purple { color: #b388ff !important; font-weight: bold; }
         .text-yellow { color: #ffcc00 !important; font-weight: bold; }
+        .text-orange { color: #ff8c00 !important; font-weight: bold; }
+        .text-cyan { color: #00f2ff !important; font-weight: bold; }
         
-        .piece-col { text-align: left; padding-left: 20px; font-weight: 500; min-width: 140px; }
-        .piece-col i { margin-right: 10px; color: #4a90e2; width: 16px; }
+        /* Piece Column with Image */
+        .piece-col { text-align: left; padding-left: 15px; font-weight: 500; min-width: 160px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2d2d35; height: 60px; }
+        .piece-icon { width: 38px; height: 38px; object-fit: contain; background: #25252d; border-radius: 6px; border: 1px solid #3d3d45; }
     </style>
 </head>
 <body>
@@ -52,11 +55,11 @@
         <table>
             <thead>
                 <tr>
-                    <th class="piece-col">Piece</th>
+                    <th style="text-align: left; padding-left: 20px;">Piece</th>
                     <th style="width: 20%;">Main Stat</th>
                     <th style="width: 20%;">Substat</th>
                     <th style="width: 20%;">Reforge</th>
-                    <th style="width: 25%;">Purple Lines</th>
+                    <th style="width: 20%;">Purple Lines</th>
                 </tr>
             </thead>
             <tbody id="planner-body">
@@ -74,41 +77,37 @@
     };
 
     const gearPieces = [
-        { name: "Weapon", icon: "fa-sword", type: "weapon" },
-        { name: "Head", icon: "fa-helmet-battle", type: "armor" },
-        { name: "Armor", icon: "fa-shield-halved", type: "armor" },
-        { name: "Gauntlets", icon: "fa-mitten", type: "armor" },
-        { name: "Boots", icon: "fa-boot", type: "armor" },
-        { name: "Earrings", icon: "fa-gem", type: "accessory" },
-        { name: "Necklace", icon: "fa-shield-heart", type: "accessory" },
-        { name: "Ring", icon: "fa-ring", type: "accessory" },
-        { name: "Bracelet L", icon: "fa-hand-dots", type: "armor" },
-        { name: "Bracelet R", icon: "fa-hand-dots", type: "armor" },
-        { name: "Charm", icon: "fa-scroll", type: "accessory" }
+        { name: "Weapon", img: "https://assets-ng.maxroll.gg/sr-tools/assets/db/icons/items/boxes/item_icons_equiptype01.webp", type: "weapon" },
+        { name: "Head", img: "https://assets-ng.maxroll.gg/sr-tools/assets/db/icons/items/boxes/item_icons_equiptype02.webp", type: "armor" },
+        { name: "Armor", img: "https://assets-ng.maxroll.gg/sr-tools/assets/db/icons/items/boxes/item_icons_equiptype05.webp", type: "armor" },
+        { name: "Gauntlets", img: "https://assets-ng.maxroll.gg/sr-tools/assets/db/icons/items/boxes/item_icons_equiptype03.webp", type: "armor" },
+        { name: "Boots", img: "https://assets-ng.maxroll.gg/sr-tools/assets/db/icons/items/boxes/item_icons_equiptype04.webp", type: "armor" },
+        { name: "Earrings", img: "https://assets-ng.maxroll.gg/sr-tools/assets/db/icons/items/boxes/item_icons_equiptype06.webp", type: "accessory" },
+        { name: "Necklace", img: "https://assets-ng.maxroll.gg/sr-tools/assets/db/icons/items/boxes/item_icons_equiptype08.webp", type: "accessory" },
+        { name: "Ring", img: "https://assets-ng.maxroll.gg/sr-tools/assets/db/icons/items/boxes/item_icons_equiptype07.webp", type: "accessory" },
+        { name: "Bracelet L", img: "https://assets-ng.maxroll.gg/sr-tools/assets/db/icons/items/boxes/item_icons_equiptype09.webp", type: "armor" },
+        { name: "Bracelet R", img: "https://assets-ng.maxroll.gg/sr-tools/assets/db/icons/items/boxes/item_icons_equiptype10.webp", type: "armor" },
+        { name: "Charm", img: "https://assets-ng.maxroll.gg/sr-tools/assets/db/icons/items/boxes/item_icons_equiptype11.webp", type: "accessory" }
     ];
 
     const statsList = ["Crit Rate", "Haste", "Mastery", "Luck", "Versatility"];
 
-    const purpleOptions = {
+	const purpleOptions = {
         armor: ["Strength %", "Agility %", "Intellect %", "All Resistance", "Armor", "Max HP"],
         accessory: ["ATK", "MATK%", "Attack Speed %", "DMG% Vs Bosses", "Shield %", "Cast Speed %", "Healing Output %", "Resilience Break Efficiency %"],
         weapon: ["ATK", "MATK%", "Attack Speed %", "DMG% Vs Bosses", "Shield %", "Cast Speed %", "Healing Output %", "Resilience Break Efficiency %"]
     };
 
-    // ฟังก์ชันป้องกันการเลือกซ้ำ
     function syncStats(selectElement) {
         const row = selectElement.closest('tr');
         const mainSelect = row.querySelector('.main-stat-select');
         const subSelect = row.querySelector('.sub-stat-select');
-        
         const mainVal = mainSelect.value;
         const subVal = subSelect.value;
 
-        // Reset disabled states for both
         Array.from(mainSelect.options).forEach(opt => opt.disabled = false);
         Array.from(subSelect.options).forEach(opt => opt.disabled = false);
 
-        // Disable selected values in the opposite dropdown
         if (mainVal) {
             const optionToDisable = Array.from(subSelect.options).find(opt => opt.value === mainVal);
             if (optionToDisable) optionToDisable.disabled = true;
@@ -132,37 +131,38 @@
             const pLineChoices = purpleOptions[piece.type] || [];
 
             const createOptions = (list) => {
-                return `<option value="">-- Select --</option>` + 
+                return `<option value="">- Select -</option>` + 
                        list.map(opt => `<option value="${opt}">${opt}</option>`).join('');
             };
 
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td class="piece-col"><i class="fas ${piece.icon}"></i> ${piece.name}</td>
+                <td>
+                    <div class="piece-col">
+                        <img src="${piece.img}" class="piece-icon" alt="${piece.name}">
+                        <span>${piece.name}</span>
+                    </div>
+                </td>
                 
-                <!-- Main Stat -->
                 <td>
                     <select class="stat-select main-stat-select" onchange="syncStats(this)">
                         ${createOptions(availableStats)}
                     </select>
                 </td>
 
-                <!-- Substat -->
                 <td>
                     <select class="stat-select sub-stat-select" onchange="syncStats(this)">
                         ${createOptions(availableStats)}
                     </select>
                 </td>
 
-                <!-- Reforge (Yellow) -->
                 <td>
                     <select class="stat-select text-yellow">
                         ${createOptions(statsList)}
                     </select>
                 </td>
 
-                <!-- Purple Lines (Purple) -->
-                <td>
+				<td>
                     <select class="stat-select text-purple">
                         ${createOptions(pLineChoices)}
                     </select>
